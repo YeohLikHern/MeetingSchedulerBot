@@ -10,3 +10,5 @@ bot.on('text', msg => {
 
     bot.sendMessage(chatId, `Hello ${ firstName }! You said "${ msgText }"!`);
 });
+
+module.exports = bot;
