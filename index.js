@@ -23,7 +23,7 @@ const firebaseServiceAccountKey = {
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: databaseURL: process.env.DATABASE_URL,
+    databaseURL: process.env.DATABASE_URL,
 });
 
 const app = express();
