@@ -34,7 +34,10 @@ bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match)
     });
 });
 
-bot.onText(/((0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5]-(0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5])/, async (msg, match) => {
+bot.on('text', async msg => {
+    const msgText = msg.text;
+    const match = msgText.match(/((0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5]-(0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5])/g);
+
     const chatId = msg.chat.id;
     const msgId = msg.message_id;
     const userId = msg.from.id;
@@ -49,7 +52,7 @@ bot.onText(/((0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5]-(0?[0-9]|1[0-9]|2[0-3]):[0-5][0,
         timeArray.push(false);
     }
 
-    for (let j = 1; j < match.length; j++) {
+    for (let j = 0; j < match.length; j++) {
         const timeIntervalArray = match[j].split('-');
         const startTimeArray = timeIntervalArray[0].split(':');
         const endTimeArray = timeIntervalArray[1].split(':');
