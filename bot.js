@@ -63,7 +63,7 @@ bot.on('text', async msg => {
         const endMinute = Number(endTimeArray[1]);
 
         const startTimeIndex = (12 * startHour) + (startMinute / 5);
-        const endTimeIndex = (12 * endMinute) + (endMinute / 5);
+        const endTimeIndex = (12 * endHour) + (endMinute / 5);
 
         for (let k = startTimeIndex; k < endTimeIndex; k++) {
             timeArray[k] = true;
