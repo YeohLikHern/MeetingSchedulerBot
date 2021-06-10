@@ -71,6 +71,11 @@ bot.onText(/^\/stop$/, async msg => {
 });
 
 bot.on('text', async msg => {
+    if (msg.chat.id > 0) {
+        await bot.sendMessage(msg.chat.id, 'I can only be used in a group chat.');
+        return;
+    }
+
     const msgText = msg.text;
     const match = msgText.match(/((0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5]-(0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5])/g);
     if (!match || match.length === 0) {
