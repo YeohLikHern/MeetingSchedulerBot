@@ -20,7 +20,7 @@ bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match)
     }
 
     const sender = msg.from;
-    const chatId = msg.chat.id;
+    const chatId = msg.chat.id.toString();
     const msgId = msg.message_id;
 
     const meetingDate = moment(match[1], 'DD/MM/YYYY').startOf('day');
@@ -41,9 +41,9 @@ bot.on('text', async msg => {
         return;
     }
 
-    const chatId = msg.chat.id;
+    const chatId = msg.chat.id.toString();
     const msgId = msg.message_id;
-    const userId = msg.from.id;
+    const userId = msg.from.id.toString();
 
     const dataSnapshot = await admin.database().ref(`${chatId}/`).get();
     if (!dataSnapshot.val()) {
