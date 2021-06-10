@@ -5,13 +5,13 @@ const token = process.env.TELEGRAM_BOT_TOKEN;
 
 const bot = new TelegramBot(token, { polling: true });
 
-/*bot.on('text', async msg => {
-    const firstName = msg.from.first_name;
-    const chatId = msg.chat.id;
-    const chatMembersCount = await bot.getChatMembersCount(chatId);
-
-    bot.sendMessage(chatId, `Hello ${ firstName }! There are ${ chatMembersCount } members in this chat.`);
-});*/
+function toTimeString(input) {
+    if (Number(input) >= 10) {
+        return input;
+    } else {
+        return `0${ input }`;
+    }
+}
 
 bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match) => {
     if (!moment(match[1], 'DD/MM/YYYY').isValid()) {
@@ -79,7 +79,7 @@ bot.on('text', async msg => {
 
     const schedules = (await admin.database().ref(`${chatId}/schedules/`).get()).val();
     const chatMembersCount = await bot.getChatMembersCount(chatId);
-    if (Object.keys(schedules).length === chatMembersCount) {
+    if (chatMembersCount - Object.keys(schedules).length === 1) {
         const availableTimeslots = [];
         let currentStatus = false;
         for (let a = 0; a < 288; a++) {
@@ -92,9 +92,9 @@ bot.on('text', async msg => {
             });
             if (isFree !== currentStatus) {
                 if (isFree) {
-                    availableTimeslots[availableTimeslots.length] = [`${Math.floor(a / 12)}:${(a % 12) * 5}`];
+                    availableTimeslots[availableTimeslots.length] = [`${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`];
                 } else {
-                    availableTimeslots[availableTimeslots.length - 1][1] = `${Math.floor(a / 12)}:${(a % 12) * 5}`;
+                    availableTimeslots[availableTimeslots.length - 1][1] = `${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`;
                 }
                 currentStatus = isFree;
             }
