@@ -28,7 +28,7 @@ bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match)
         meetingDate: meetingDate.valueOf(),
     });
 
-    await bot.sendMessage(chatId, `${ sender.username ? '@' + sender.username : '<b>' + sender.first_name + '</b>' } wants to schedule a meeting on <b>${ meetingDate.format('DD MMM YYYY') }</b>.\n\nPlease indicate your availability in the format <b>HH:MM-HH:MM</b>, separated by linebreaks where applicable.\n\n<b>Example:</b>\n09:00-11:30\n14:00-16:00`, {
+    await bot.sendMessage(chatId, `${ sender.username ? '@' + sender.username : '<b>' + sender.first_name + '</b>' } wants to schedule a meeting on <b>${ meetingDate.format('DD MMM YYYY') }</b>.\n\nPlease indicate your availability in the format <b>HH:MM-HH:MM</b>, separated by linebreaks where applicable. Times specified should end in 5 or 0.\n\n<b>Example:</b>\n09:15-11:30\n14:00-16:45`, {
         parse_mode: 'HTML',
         reply_to_message_id: msgId,
     });
