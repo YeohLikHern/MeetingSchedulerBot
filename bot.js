@@ -67,7 +67,7 @@ bot.onText(/^\/stop$/, async msg => {
 bot.on('text', async msg => {
     const msgText = msg.text;
     const match = msgText.match(/((0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5]-(0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5])/g);
-    if (match.length === 0) {
+    if (!match || match.length === 0) {
         return;
     }
 
