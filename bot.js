@@ -76,6 +76,35 @@ bot.on('text', async msg => {
         parse_mode: 'HTML',
         reply_to_message_id: msgId,
     });
+
+    const schedules = (await admin.database().ref(`${chatId}/schedules/`).get()).val();
+    const chatMembersCount = await bot.getChatMembersCount(chatId);
+    if (Object.keys(schedules).length === chatMembersCount) {
+        const availableTimeslots = [];
+        let currentStatus = false;
+        for (let a = 0; a < 288; a++) {
+            let isFree = true;
+            Object.values(schedules).forEach(schedule => {
+                if (!schedule[a]) {
+                    isFree = false;
+                    return;
+                }
+            });
+            if (isFree !== currentStatus) {
+                if (isFree) {
+                    availableTimeslots[availableTimeslots.length] = [`${Math.floor(a / 12)}:${(a % 12) * 5}`];
+                } else {
+                    availableTimeslots[availableTimeslots.length - 1][1] = `${Math.floor(a / 12)}:${(a % 12) * 5}`;
+                }
+                currentStatus = isFree;
+            }
+        }
+        
+        const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
+        await bot.sendMessage(chatId, `<b>Available timeslots:</b>\n${scheduleString}`, {
+            parse_mode: 'HTML',
+        });
+    }
 });
 
 module.exports = bot;
