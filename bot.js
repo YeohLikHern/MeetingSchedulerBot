@@ -121,7 +121,8 @@ bot.on('text', async msg => {
         reply_to_message_id: msgId,
     });
 
-    const schedules = (await admin.database().ref(`${chatId}/schedules/`).get()).val();
+    const meetingData = (await admin.database().ref(`${chatId}/`).get()).val();
+    const { meetingDate, schedules } = meetingData;
     const chatMembersCount = await bot.getChatMembersCount(chatId);
     if (chatMembersCount - Object.keys(schedules).length === 1) {
         const availableTimeslots = [];
@@ -145,7 +146,7 @@ bot.on('text', async msg => {
         }
         
         const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
-        await bot.sendMessage(chatId, `<b>Available timeslots:</b>\n${scheduleString}`, {
+        await bot.sendMessage(chatId, `<b>${ moment(meetingDate).format('DD MMM YYYY') }\nAvailable timeslots:</b>\n${scheduleString}`, {
             parse_mode: 'HTML',
         });
 
