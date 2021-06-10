@@ -35,6 +35,7 @@ bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match)
 });
 
 bot.onText(/^\/stop$/, async msg => {
+    const chatId = msg.chat.id.toString();
     const schedules = (await admin.database().ref(`${chatId}/schedules/`).get()).val();
 
     const availableTimeslots = [];
