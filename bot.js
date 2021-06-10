@@ -37,6 +37,9 @@ bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match)
 bot.on('text', async msg => {
     const msgText = msg.text;
     const match = msgText.match(/((0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5]-(0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5])/g);
+    if (match.length === 0) {
+        return;
+    }
 
     const chatId = msg.chat.id;
     const msgId = msg.message_id;
