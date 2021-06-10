@@ -36,11 +36,12 @@ bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match)
 
 bot.onText(/^\/stop$/, async msg => {
     const chatId = msg.chat.id.toString();
-    const schedules = (await admin.database().ref(`${chatId}/schedules/`).get()).val();
-    if (!schedules) {
+    const meetingData = (await admin.database().ref(`${chatId}/`).get()).val();
+    if (!meetingData) {
         return;
     }
 
+    const { meetingDate, schedules } = meetingData;
     const availableTimeslots = [];
     let currentStatus = false;
     for (let a = 0; a < 288; a++) {
@@ -62,7 +63,7 @@ bot.onText(/^\/stop$/, async msg => {
     }
     
     const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
-    await bot.sendMessage(chatId, `<b>Available timeslots:</b>\n${scheduleString}`, {
+    await bot.sendMessage(chatId, `<b>${ moment(meetingDate).format('DD MMM YYYY') }\nAvailable timeslots:</b>\n${scheduleString}`, {
         parse_mode: 'HTML',
     });
 
