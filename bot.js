@@ -34,6 +34,35 @@ bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match)
     });
 });
 
+bot.onText(/^\/stop$/, async msg => {
+    const schedules = (await admin.database().ref(`${chatId}/schedules/`).get()).val();
+
+    const availableTimeslots = [];
+        let currentStatus = false;
+        for (let a = 0; a < 288; a++) {
+            let isFree = true;
+            Object.values(schedules).forEach(schedule => {
+                if (!schedule[a]) {
+                    isFree = false;
+                    return;
+                }
+            });
+            if (isFree !== currentStatus) {
+                if (isFree) {
+                    availableTimeslots[availableTimeslots.length] = [`${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`];
+                } else {
+                    availableTimeslots[availableTimeslots.length - 1][1] = `${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`;
+                }
+                currentStatus = isFree;
+            }
+        }
+        
+        const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
+        await bot.sendMessage(chatId, `<b>Available timeslots:</b>\n${scheduleString}`, {
+            parse_mode: 'HTML',
+        });
+});
+
 bot.on('text', async msg => {
     const msgText = msg.text;
     const match = msgText.match(/((0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5]-(0?[0-9]|1[0-9]|2[0-3]):[0-5][0,5])/g);
