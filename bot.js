@@ -37,31 +37,36 @@ bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match)
 bot.onText(/^\/stop$/, async msg => {
     const chatId = msg.chat.id.toString();
     const schedules = (await admin.database().ref(`${chatId}/schedules/`).get()).val();
+    if (!schedules) {
+        return;
+    }
 
     const availableTimeslots = [];
-        let currentStatus = false;
-        for (let a = 0; a < 288; a++) {
-            let isFree = true;
-            Object.values(schedules).forEach(schedule => {
-                if (!schedule[a]) {
-                    isFree = false;
-                    return;
-                }
-            });
-            if (isFree !== currentStatus) {
-                if (isFree) {
-                    availableTimeslots[availableTimeslots.length] = [`${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`];
-                } else {
-                    availableTimeslots[availableTimeslots.length - 1][1] = `${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`;
-                }
-                currentStatus = isFree;
+    let currentStatus = false;
+    for (let a = 0; a < 288; a++) {
+        let isFree = true;
+        Object.values(schedules).forEach(schedule => {
+            if (!schedule[a]) {
+                isFree = false;
+                return;
             }
-        }
-        
-        const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
-        await bot.sendMessage(chatId, `<b>Available timeslots:</b>\n${scheduleString}`, {
-            parse_mode: 'HTML',
         });
+        if (isFree !== currentStatus) {
+            if (isFree) {
+                availableTimeslots[availableTimeslots.length] = [`${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`];
+            } else {
+                availableTimeslots[availableTimeslots.length - 1][1] = `${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`;
+            }
+            currentStatus = isFree;
+        }
+    }
+    
+    const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
+    await bot.sendMessage(chatId, `<b>Available timeslots:</b>\n${scheduleString}`, {
+        parse_mode: 'HTML',
+    });
+
+    await admin.database().ref(`${chatId}/`).remove();
 });
 
 bot.on('text', async msg => {
@@ -137,6 +142,8 @@ bot.on('text', async msg => {
         await bot.sendMessage(chatId, `<b>Available timeslots:</b>\n${scheduleString}`, {
             parse_mode: 'HTML',
         });
+
+        await admin.database().ref(`${chatId}/`).remove();
     }
 });
 
