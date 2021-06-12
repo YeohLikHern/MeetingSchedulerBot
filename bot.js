@@ -14,17 +14,17 @@ function toTimeString(input) {
 }
 
 bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match) => {
+    const sender = msg.from;
+    const chatId = msg.chat.id.toString();
+    const msgId = msg.message_id;
+
     if (!moment(match[1], 'DD/MM/YYYY').isValid()) {
         await bot.sendMessage(chatId, 'Please provide a valid date in the format DD/MM/YYYY.');
         return;
     }
 
-    const sender = msg.from;
-    const chatId = msg.chat.id.toString();
-    const msgId = msg.message_id;
-
     const meetingDate = moment(match[1], 'DD/MM/YYYY').startOf('day');
-    await admin.database().ref(`${chatId}/`).set({
+    await admin.database().ref(`${ chatId }/`).set({
         meetingDate: meetingDate.valueOf(),
     });
 
@@ -36,7 +36,7 @@ bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match)
 
 bot.onText(/^\/stop$/, async msg => {
     const chatId = msg.chat.id.toString();
-    const meetingData = (await admin.database().ref(`${chatId}/`).get()).val();
+    const meetingData = (await admin.database().ref(`${ chatId }/`).get()).val();
     if (!meetingData) {
         return;
     }
@@ -46,28 +46,28 @@ bot.onText(/^\/stop$/, async msg => {
     let currentStatus = false;
     for (let a = 0; a < 288; a++) {
         let isFree = true;
-        Object.values(schedules).forEach(schedule => {
+        for (const schedule of Object.values(schedules)) {
             if (!schedule[a]) {
                 isFree = false;
-                return;
+                break;
             }
-        });
+        }
         if (isFree !== currentStatus) {
             if (isFree) {
-                availableTimeslots[availableTimeslots.length] = [`${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`];
+                availableTimeslots[availableTimeslots.length] = [`${ toTimeString(Math.floor(a / 12)) }:${ toTimeString((a % 12) * 5) }`];
             } else {
-                availableTimeslots[availableTimeslots.length - 1][1] = `${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`;
+                availableTimeslots[availableTimeslots.length - 1][1] = `${ toTimeString(Math.floor(a / 12)) }:${ toTimeString((a % 12) * 5) }`;
             }
             currentStatus = isFree;
         }
     }
-    
+
     const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
-    await bot.sendMessage(chatId, `<b>${ moment(meetingDate).format('DD MMM YYYY') }\nAvailable timeslots:</b>\n${scheduleString}`, {
+    await bot.sendMessage(chatId, `<b>${ moment(meetingDate).format('DD MMM YYYY') }\nAvailable timeslots:</b>\n${ scheduleString }`, {
         parse_mode: 'HTML',
     });
 
-    await admin.database().ref(`${chatId}/`).remove();
+    await admin.database().ref(`${ chatId }/`).remove();
 });
 
 bot.on('text', async msg => {
@@ -86,7 +86,7 @@ bot.on('text', async msg => {
     const msgId = msg.message_id;
     const userId = msg.from.id.toString();
 
-    const dataSnapshot = await admin.database().ref(`${chatId}/`).get();
+    const dataSnapshot = await admin.database().ref(`${ chatId }/`).get();
     if (!dataSnapshot.val()) {
         return;
     }
@@ -107,8 +107,8 @@ bot.on('text', async msg => {
         const endMinute = Number(endTimeArray[1]);
 
         const startTimeIndex = (12 * startHour) + (startMinute / 5);
-        const endTimeIndex = (12 * endHour) + (endMinute / 5);
-        if(startTimeIndex > endTimeIndex) {
+        let endTimeIndex = (12 * endHour) + (endMinute / 5);
+        if (startTimeIndex > endTimeIndex) {
             endTimeIndex = 287;
         }
 
@@ -117,14 +117,14 @@ bot.on('text', async msg => {
         }
     }
 
-    await admin.database().ref(`${chatId}/schedules/${userId}/`).set(timeArray);
-    
+    await admin.database().ref(`${ chatId }/schedules/${ userId }/`).set(timeArray);
+
     await bot.sendMessage(chatId, '\u2705', {
         parse_mode: 'HTML',
         reply_to_message_id: msgId,
     });
 
-    const meetingData = (await admin.database().ref(`${chatId}/`).get()).val();
+    const meetingData = (await admin.database().ref(`${ chatId }/`).get()).val();
     const { meetingDate, schedules } = meetingData;
     const chatMembersCount = await bot.getChatMembersCount(chatId);
     if (chatMembersCount - Object.keys(schedules).length === 1) {
@@ -132,28 +132,28 @@ bot.on('text', async msg => {
         let currentStatus = false;
         for (let a = 0; a < 288; a++) {
             let isFree = true;
-            Object.values(schedules).forEach(schedule => {
+            for (const schedule of Object.values(schedules)) {
                 if (!schedule[a]) {
                     isFree = false;
-                    return;
+                    break;
                 }
-            });
+            }
             if (isFree !== currentStatus) {
                 if (isFree) {
-                    availableTimeslots[availableTimeslots.length] = [`${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`];
+                    availableTimeslots[availableTimeslots.length] = [`${ toTimeString(Math.floor(a / 12)) }:${ toTimeString((a % 12) * 5) }`];
                 } else {
-                    availableTimeslots[availableTimeslots.length - 1][1] = `${toTimeString(Math.floor(a / 12))}:${toTimeString((a % 12) * 5)}`;
+                    availableTimeslots[availableTimeslots.length - 1][1] = `${ toTimeString(Math.floor(a / 12)) }:${ toTimeString((a % 12) * 5) }`;
                 }
                 currentStatus = isFree;
             }
         }
-        
+
         const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
-        await bot.sendMessage(chatId, `<b>${ moment(meetingDate).format('DD MMM YYYY') }\nAvailable timeslots:</b>\n${scheduleString}`, {
+        await bot.sendMessage(chatId, `<b>${ moment(meetingDate).format('DD MMM YYYY') }\nAvailable timeslots:</b>\n${ scheduleString }`, {
             parse_mode: 'HTML',
         });
 
-        await admin.database().ref(`${chatId}/`).remove();
+        await admin.database().ref(`${ chatId }/`).remove();
     }
 });
 
