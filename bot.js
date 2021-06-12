@@ -62,6 +62,10 @@ bot.onText(/^\/stop$/, async msg => {
         }
     }
 
+    if (!availableTimeslots[availableTimeslots.length - 1][1]) {
+        availableTimeslots[availableTimeslots.length - 1][1] = '00:00';
+    }
+
     const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
     await bot.sendMessage(chatId, `<b>${ moment(meetingDate).format('DD MMM YYYY') }\nAvailable timeslots:</b>\n${ scheduleString }`, {
         parse_mode: 'HTML',
