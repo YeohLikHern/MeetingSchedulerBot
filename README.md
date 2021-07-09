@@ -8,6 +8,8 @@ Create a new meeting:
 
 e.g. `/schedule 09/07/2021`
 
+Computation of available times will automatically take place when everyone in the group has responded, or when the `/stop` command is called.
+
 ## Testing locally
 Create a new Telegram bot through [@BotFather](https://t.me/BotFather), and set the value of the environment variable `TELEGRAM_BOT_TOKEN`.
 
