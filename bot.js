@@ -13,6 +13,35 @@ function toTimeString(input) {
     }
 }
 
+function computeAvailable(schedules) {
+    const availableTimeslots = [];
+    let currentStatus = false;
+    for (let a = 0; a < 288; a++) {
+        let isFree = true;
+        for (const schedule of Object.values(schedules)) {
+            if (!schedule[a]) {
+                isFree = false;
+                break;
+            }
+        }
+        if (isFree !== currentStatus) {
+            if (isFree) {
+                availableTimeslots[availableTimeslots.length] = [`${ toTimeString(Math.floor(a / 12)) }:${ toTimeString((a % 12) * 5) }`];
+            } else {
+                availableTimeslots[availableTimeslots.length - 1][1] = `${ toTimeString(Math.floor(a / 12)) }:${ toTimeString((a % 12) * 5) }`;
+            }
+            currentStatus = isFree;
+        }
+    }
+
+    if (!availableTimeslots[availableTimeslots.length - 1][1]) {
+        availableTimeslots[availableTimeslots.length - 1][1] = '00:00';
+    }
+
+    const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
+    return scheduleString;
+}
+
 bot.onText(/^\/schedule ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})$/, async (msg, match) => {
     const sender = msg.from;
     const chatId = msg.chat.id.toString();
@@ -42,31 +71,7 @@ bot.onText(/^\/stop$/, async msg => {
     }
 
     const { meetingDate, schedules } = meetingData;
-    const availableTimeslots = [];
-    let currentStatus = false;
-    for (let a = 0; a < 288; a++) {
-        let isFree = true;
-        for (const schedule of Object.values(schedules)) {
-            if (!schedule[a]) {
-                isFree = false;
-                break;
-            }
-        }
-        if (isFree !== currentStatus) {
-            if (isFree) {
-                availableTimeslots[availableTimeslots.length] = [`${ toTimeString(Math.floor(a / 12)) }:${ toTimeString((a % 12) * 5) }`];
-            } else {
-                availableTimeslots[availableTimeslots.length - 1][1] = `${ toTimeString(Math.floor(a / 12)) }:${ toTimeString((a % 12) * 5) }`;
-            }
-            currentStatus = isFree;
-        }
-    }
-
-    if (!availableTimeslots[availableTimeslots.length - 1][1]) {
-        availableTimeslots[availableTimeslots.length - 1][1] = '00:00';
-    }
-
-    const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
+    const scheduleString = computeAvailable(schedules);
     await bot.sendMessage(chatId, `<b>${ moment(meetingDate).format('DD MMM YYYY') }\nAvailable timeslots:</b>\n${ scheduleString }`, {
         parse_mode: 'HTML',
     });
@@ -132,27 +137,7 @@ bot.on('text', async msg => {
     const { meetingDate, schedules } = meetingData;
     const chatMembersCount = await bot.getChatMembersCount(chatId);
     if (chatMembersCount - Object.keys(schedules).length === 1) {
-        const availableTimeslots = [];
-        let currentStatus = false;
-        for (let a = 0; a < 288; a++) {
-            let isFree = true;
-            for (const schedule of Object.values(schedules)) {
-                if (!schedule[a]) {
-                    isFree = false;
-                    break;
-                }
-            }
-            if (isFree !== currentStatus) {
-                if (isFree) {
-                    availableTimeslots[availableTimeslots.length] = [`${ toTimeString(Math.floor(a / 12)) }:${ toTimeString((a % 12) * 5) }`];
-                } else {
-                    availableTimeslots[availableTimeslots.length - 1][1] = `${ toTimeString(Math.floor(a / 12)) }:${ toTimeString((a % 12) * 5) }`;
-                }
-                currentStatus = isFree;
-            }
-        }
-
-        const scheduleString = availableTimeslots.map((value) => value.join('-')).join('\n');
+        const scheduleString = computeAvailable(schedules);
         await bot.sendMessage(chatId, `<b>${ moment(meetingDate).format('DD MMM YYYY') }\nAvailable timeslots:</b>\n${ scheduleString }`, {
             parse_mode: 'HTML',
         });
